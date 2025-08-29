@@ -1,0 +1,18 @@
+[package]
+name = "XenorLuaGenerator"
+version = "1.0.0"
+edition = "2024"
+description = "A Garry's mod Lua documentation generator."
+license = "BSD 3-Clause"
+repository = "https://github.com/Xenor-Framework"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[profile.release]
+opt-level = "z"          # max performance traded for larger file size
+lto = "fat"              # full link time optimization
+codegen-units = 1        # better optimization traded for slower compilation
+panic = "abort"          # faster panics
+strip = "symbols"        # remove debug symbols
