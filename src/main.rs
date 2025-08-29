@@ -4,6 +4,8 @@ use std::fs;
 use std::io::Write;
 use std::path::Path;
 
+mod scanner;
+
 #[derive(Debug, Deserialize, Serialize)]
 struct Param {
     name: String,
