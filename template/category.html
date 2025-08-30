@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{category}} - Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="search-container">
+                <input type="text" id="search" class="search-box" placeholder="Search...">
+            </div>
+            <nav class="navigation">
+                {{navigation}}
+            </nav>
+        </aside>
+        
+        <main class="content">
+            <h1 class="page-title">{{category}}</h1>
+            {{functions}}
+            <footer class="footer">
+                <div class="copyright">
+                    © 2025 XenorSDK BSD 3-Clause https://github.com/Xenor-Framework
+                </div>
+            </footer>
+        </main>
+    </div>
+    <script src="search.js"></script>
+</body>
+</html>

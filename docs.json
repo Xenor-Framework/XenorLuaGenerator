@@ -1,0 +1,39 @@
+{
+  "Player": [
+    {
+      "name": "Kick()",
+      "description": "Disconnects a player from the server.",
+      "params": [
+        { "name": "reason", "type": "string", "description": "The reason to show" }
+      ],
+      "returns": []
+    },
+    {
+      "name": "Ban()",
+      "description": "Bans player from the server.",
+      "params": [
+        { "name": "minutes", "type": "number", "description": "Duration of the ban" },
+        { "name": "kick", "type": "boolean", "description": "Also kick the player" }
+      ],
+      "returns": []
+    }
+  ],
+  "Entity": [
+    {
+      "name": "SafeRemove()",
+      "description": "Safely removes the entity.",
+      "params": [],
+      "returns": []
+    }
+  ],
+  "Xenor.Bootloader": [
+    {
+      "name": "CommonInclude",
+      "description": "Auto includes specified file relative to bootloader folder",
+      "params": [
+        { "name": "fileName", "type": "string", "description": "Name of the file without .lua suffix" }
+      ],
+      "returns": []
+    }
+  ]
+}
