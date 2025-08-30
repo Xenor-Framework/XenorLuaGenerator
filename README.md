@@ -1,6 +1,8 @@
 [![BSD 3-Clause](https://img.shields.io/badge/License-BSD3-Claus.svg)](https://opensource.org/license/bsd-3-clause)
 
 # 📖 Xenor Lua Generator
+#### Part of the XenorSDK
+
 A static website lua documentation generator which you can customize. Outputs ready-to-use website files. It's that simple! 🚀
 
 ## How-to ❓
@@ -31,5 +33,3 @@ Run this command inside the project folder to build your own binary
 ```bash
 cargo build --release
 ```
-
-#### Part of the XenorSDK
