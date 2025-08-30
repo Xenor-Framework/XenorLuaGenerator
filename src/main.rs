@@ -125,7 +125,7 @@ body::before {
 
 .search-box:focus {
     outline: none;
-    border-color: rgba(0,122,255,0.6);
+    border-color: rgba(242,242,247,0.6);
     background: rgba(58,58,60,0.8);
 }
 
@@ -199,9 +199,9 @@ body::before {
 }
 
 .nav-link.active {
-    background: rgba(0,122,255,0.2);
-    color: #007AFF;
-    border-left: 3px solid #007AFF;
+    background: rgba(242,242,247,0.2);
+    color: #F2F2F7;
+    border-left: 3px solid #F2F2F7;
     padding-left: 13px;
 }
 
@@ -217,7 +217,7 @@ body::before {
     font-weight: 700;
     margin-bottom: 30px;
     color: #ffffff;
-    border-bottom: 2px solid rgba(0,122,255,0.3);
+    border-bottom: 2px solid rgba(242,242,247,0.3);
     padding-bottom: 16px;
 }
 
