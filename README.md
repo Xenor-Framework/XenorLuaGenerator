@@ -31,3 +31,5 @@ Run this command inside the project folder to build your own binary
 ```bash
 cargo build --release
 ```
+
+#### Part of the XenorSDK
