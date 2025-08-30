@@ -15,6 +15,8 @@ A template folder must be present in the same location as XenorLuaGenerator/.exe
 ```
 *Use the default template folder provided in this repository, simply move to the same folder where the executable XenorLuaGenerator is.*
 
+*A showcase docs.json is included so you can test it out! Do not use docs.json from this repository, build your own using the executable!*
+
 #### 2. Generate docs.json and build website
 
 Run XenorLuaGenerator with arguments specified below to build your website.
