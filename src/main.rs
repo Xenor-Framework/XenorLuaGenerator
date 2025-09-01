@@ -3,38 +3,30 @@ use std::collections::HashMap;
 use std::fs;
 use std::io::Write;
 use std::path::Path;
+use std::env;
 
 mod scanner;
-
-#[derive(Debug, Deserialize, Serialize)]
-struct Param {
-    name: String,
-    #[serde(rename = "type")]
-    param_type: String,
-    description: String,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-struct Return {
-    #[serde(rename = "type")]
-    return_type: String,
-    description: String,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-struct Function {
-    name: String,
-    description: String,
-    params: Vec<Param>,
-    returns: Vec<Return>,
-}
-
-type Documentation = HashMap<String, Vec<Function>>;
+use scanner::{Documentation, Function, Param, Return};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let json_content = fs::read_to_string("docs.json")
-        .expect("[ ERROR ] Failed to read docs.json from current directory");
-    let docs: Documentation = serde_json::from_str(&json_content)?;
+    let args: Vec<String> = env::args().collect();
+    
+    let docs = if args.len() > 1 {
+        let path = &args[1];
+        println!("[ INFO ] Scanning directory: {}", path);
+        let scanned_docs = scanner::scan_directory(path)?;
+        
+        let json_output = serde_json::to_string_pretty(&scanned_docs)?;
+        fs::write("docs.json", json_output)?;
+        println!("[ OK ] Generated docs.json from source files");
+        
+        scanned_docs
+    } else {
+        println!("[ INFO ] No directory specified, reading existing docs.json");
+        let json_content = fs::read_to_string("docs.json")
+            .expect("[ ERROR ] Failed to read docs.json from current directory");
+        serde_json::from_str(&json_content)?
+    };
     
     let dist_path = Path::new("dist");
     if dist_path.exists() {
@@ -43,7 +35,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     fs::create_dir(dist_path)?;
     
     generate_css()?;
-    
     generate_search_script()?;
     
     for (category, functions) in &docs {
