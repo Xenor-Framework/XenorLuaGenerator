@@ -22,7 +22,12 @@ A template folder must be present in the same location as XenorLuaGenerator/.exe
 Run XenorLuaGenerator with arguments specified below to build your website.
 First we need a docs.json which the web builder uses to identify all your functions.
 ```bash
-./XenorLuaGenerator -<FULL PATH TO FOLDER CONTAINING LUA FILES AND SUBFOLDERS>
+./XenorLuaGenerator <FULL PATH TO FOLDER CONTAINING LUA FILES AND SUBFOLDERS>
+```
+
+***Example***
+```bash
+./XenorLuaGenerator /home/MyPC/gamemode
 ```
 
 *This will run a recursive scan on that folder and finds all your .lua files and generates a docs.json based on your comments and generates you your website files located in ./dist/<FINAL WEBSITE FILES> ready to be uploaded to GitHub pages for example!*
