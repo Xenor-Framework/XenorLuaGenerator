@@ -16,6 +16,8 @@ function Math.subtract(x, y)
     return x - y
 end
 
+-- a simple comment
+
 --@ class Array
 --@ desc Finds the maximum value in an array of numbers
 --@ param arr table An array of numbers
