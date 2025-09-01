@@ -27,8 +27,28 @@ pub struct Function {
     pub returns: Vec<Return>,
 }
 
-pub type Documentation = HashMap<String, Vec<Function>>;
+#[derive(Debug)]
+struct DocBlock {
+    class_name: Option<String>,
+    description: String,
+    params: Vec<Param>,
+    returns: Vec<Return>,
+    start_line: usize,
+}
 
+impl DocBlock {
+    fn new(start_line: usize) -> Self {
+        Self {
+            class_name: None,
+            description: String::new(),
+            params: Vec::new(),
+            returns: Vec::new(),
+            start_line,
+        }
+    }
+}
+
+pub type Documentation = HashMap<String, Vec<Function>>;
 pub fn scan_directory(path: &str) -> Result<Documentation, Box<dyn std::error::Error>> {
     let mut docs: Documentation = HashMap::new();
     scan_recursive(&Path::new(path), &mut docs)?;
@@ -71,73 +91,80 @@ fn parse_lua_file(path: &PathBuf, docs: &mut Documentation) -> Result<(), Box<dy
     Ok(())
 }
 
+fn is_doc_comment(line: &str) -> bool {
+    let trimmed = line.trim_start();
+    trimmed.starts_with("--@") || trimmed.starts_with("-- @") || 
+    (trimmed.starts_with("--") && !trimmed.starts_with("---") && !trimmed.starts_with("-- TODO") && !trimmed.starts_with("-- FIXME"))
+}
+
+fn extract_doc_content(line: &str) -> String {
+    line.trim_start()
+        .trim_start_matches("--@")
+        .trim_start_matches("-- @")
+        .trim_start_matches("--")
+        .trim()
+        .to_string()
+}
+
+fn categorize_function(func_name: &str, class_name: &Option<String>) -> (String, String) {
+    if func_name.contains('.') {
+        let parts: Vec<&str> = func_name.splitn(2, '.').collect();
+        (parts[0].to_string(), parts[1].to_string())
+    } else {
+        let category = class_name.clone().unwrap_or_else(|| "Global".to_string());
+        (category, func_name.to_string())
+    }
+}
+
 fn parse_function_doc(lines: &[&str], index: &mut usize) -> Option<(String, Function)> {
-    let mut class_name = String::new();
-    let mut description = String::new();
-    let mut params = Vec::new();
-    let mut returns = Vec::new();
-    
-    let start_index = *index;
-    
-    // Parse comment block
-    while *index < lines.len() && (lines[*index].trim_start().starts_with("--@") || lines[*index].trim_start().starts_with("-- @")) {
-        let line = lines[*index].trim_start()
-            .trim_start_matches("--@")
-            .trim_start_matches("-- @")
-            .trim();
+    let mut doc_block = DocBlock::new(*index);
+
+    while *index < lines.len() && is_doc_comment(lines[*index]) {
+        let content = extract_doc_content(lines[*index]);
         
-        if line.starts_with("class ") {
-            class_name = line[6..].trim().to_string();
-        } else if line.starts_with("desc ") {
-            description = line[5..].trim().to_string();
-        } else if line.starts_with("param ") {
-            if let Some(param) = parse_param(line) {
-                params.push(param);
-            }
-        } else if line.starts_with("return ") {
-            let return_info = line[7..].trim();
-            let parts: Vec<&str> = return_info.splitn(2, ',').map(|s| s.trim()).collect();
-            if parts.len() == 2 {
-                returns.push(Return {
-                    return_type: parts[0].to_string(),
-                    description: parts[1].to_string(),
-                });
+        if let Some(tag_content) = content.strip_prefix("class ") {
+            doc_block.class_name = Some(tag_content.trim().to_string());
+        } else if let Some(tag_content) = content.strip_prefix("desc ") {
+            if doc_block.description.is_empty() {
+                doc_block.description = tag_content.trim().to_string();
             } else {
-                returns.push(Return {
-                    return_type: "any".to_string(),
-                    description: return_info.to_string(),
-                });
+                doc_block.description.push(' ');
+                doc_block.description.push_str(tag_content.trim());
             }
+        } else if let Some(tag_content) = content.strip_prefix("param ") {
+            if let Some(param) = parse_param(tag_content) {
+                doc_block.params.push(param);
+            }
+        } else if let Some(tag_content) = content.strip_prefix("return ") {
+            if let Some(ret) = parse_return(tag_content) {
+                doc_block.returns.push(ret);
+            }
+        } else if content.starts_with('@') {
+            continue;
+        } else if !content.trim().is_empty() && doc_block.description.is_empty() {
+            doc_block.description = content.trim().to_string();
         }
+        
         *index += 1;
     }
     
-    // Skip empty lines
     while *index < lines.len() && lines[*index].trim().is_empty() {
         *index += 1;
     }
-    
-    // Parse function declaration
-    if *index < lines.len() {
-        let func_line = lines[*index];
-        if let Some(func_name) = extract_function_name(func_line) {
-            let (category, name) = if func_name.contains('.') {
-                let parts: Vec<&str> = func_name.splitn(2, '.').collect();
-                (parts[0].to_string(), parts[1].to_string())
-            } else {
-                let cat = if !class_name.is_empty() {
-                    class_name
-                } else {
-                    "Global".to_string()
-                };
-                (cat, func_name)
-            };
+
+    for lookahead in 0..3 {
+        if *index + lookahead >= lines.len() {
+            break;
+        }
+        
+        if let Some(func_name) = extract_function_name(lines[*index + lookahead]) {
+            let (category, name) = categorize_function(&func_name, &doc_block.class_name);
             
             return Some((category, Function {
-                name: name,
-                description,
-                params,
-                returns,
+                name,
+                description: doc_block.description,
+                params: doc_block.params,
+                returns: doc_block.returns,
             }));
         }
     }
@@ -145,25 +172,63 @@ fn parse_function_doc(lines: &[&str], index: &mut usize) -> Option<(String, Func
     None
 }
 
-fn parse_param(line: &str) -> Option<Param> {
-    let content = line[6..].trim();
-    let parts: Vec<&str> = content.splitn(3, ',').map(|s| s.trim()).collect();
+fn parse_return(content: &str) -> Option<Return> {
+    let content = content.trim();
     
-    if parts.len() >= 3 {
-        Some(Param {
-            name: parts[0].to_string(),
-            param_type: parts[1].to_string(),
-            description: parts[2].to_string(),
-        })
-    } else if parts.len() == 2 {
-        Some(Param {
-            name: parts[0].to_string(),
-            param_type: parts[1].to_string(),
-            description: String::new(),
-        })
-    } else {
-        None
+    if let Some(comma_pos) = content.find(',') {
+        let return_type = content[..comma_pos].trim().to_string();
+        let description = content[comma_pos + 1..].trim().to_string();
+        return Some(Return { return_type, description });
     }
+    
+    if let Some(space_pos) = content.find(' ') {
+        let return_type = content[..space_pos].trim().to_string();
+        let description = content[space_pos + 1..].trim().to_string();
+        return Some(Return { return_type, description });
+    }
+    
+    Some(Return {
+        return_type: content.to_string(),
+        description: String::new(),
+    })
+}
+
+fn parse_param(content: &str) -> Option<Param> {
+    let content = content.trim();
+    
+    if let Some(colon_pos) = content.find(':') {
+        let name = content[..colon_pos].trim().to_string();
+        let rest = &content[colon_pos + 1..];
+        
+        if let Some(space_pos) = rest.find(' ') {
+            let param_type = rest[..space_pos].trim().to_string();
+            let description = rest[space_pos + 1..].trim().to_string();
+            return Some(Param { name, param_type, description });
+        } else {
+            let param_type = rest.trim().to_string();
+            return Some(Param { name, param_type, description: String::new() });
+        }
+    }
+    
+    let parts: Vec<&str> = content.splitn(3, ',').map(|s| s.trim()).collect();
+    if parts.len() >= 2 {
+        return Some(Param {
+            name: parts[0].to_string(),
+            param_type: parts[1].to_string(),
+            description: parts.get(2).unwrap_or(&"").to_string(),
+        });
+    }
+    
+    let words: Vec<&str> = content.split_whitespace().collect();
+    if words.len() >= 2 {
+        return Some(Param {
+            name: words[0].to_string(),
+            param_type: words[1].to_string(),
+            description: words[2..].join(" "),
+        });
+    }
+    
+    None
 }
 
 fn extract_function_name(line: &str) -> Option<String> {

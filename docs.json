@@ -1,39 +1,112 @@
 {
-  "Player": [
+  "Array": [
     {
-      "name": "Kick()",
-      "description": "Disconnects a player from the server.",
+      "name": "max",
+      "description": "Finds the maximum value in an array of numbers",
       "params": [
-        { "name": "reason", "type": "string", "description": "The reason to show" }
+        {
+          "name": "arr",
+          "type": "table",
+          "description": "An array of numbers"
+        }
+      ],
+      "returns": [
+        {
+          "type": "number",
+          "description": "The maximum value found"
+        },
+        {
+          "type": "boolean True if array was not empty",
+          "description": "false otherwise"
+        }
+      ]
+    }
+  ],
+  "Global": [
+    {
+      "name": "greet",
+      "description": "A simple greeting function that demonstrates multi-line descriptions across multiple comment lines",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "The person's name"
+        },
+        {
+          "name": "greeting",
+          "type": "string",
+          "description": "Optional greeting word"
+        }
       ],
       "returns": []
+    }
+  ],
+  "Math": [
+    {
+      "name": "Remove",
+      "description": "My Remove function is very cool!",
+      "params": [
+        {
+          "name": "x",
+          "type": "number",
+          "description": "Value 1"
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "description": "Value 2"
+        }
+      ],
+      "returns": [
+        {
+          "type": "Difference",
+          "description": "after subtracting"
+        }
+      ]
     },
     {
-      "name": "Ban()",
-      "description": "Bans player from the server.",
+      "name": "Add",
+      "description": "My Add function is very cool!",
       "params": [
-        { "name": "minutes", "type": "number", "description": "Duration of the ban" },
-        { "name": "kick", "type": "boolean", "description": "Also kick the player" }
+        {
+          "name": "x",
+          "type": "number",
+          "description": "Value 1"
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "description": "Value 2"
+        }
       ],
-      "returns": []
-    }
-  ],
-  "Entity": [
+      "returns": [
+        {
+          "type": "Sum",
+          "description": "of two numbers"
+        }
+      ]
+    },
     {
-      "name": "SafeRemove()",
-      "description": "Safely removes the entity.",
-      "params": [],
-      "returns": []
-    }
-  ],
-  "Xenor.Bootloader": [
-    {
-      "name": "CommonInclude",
-      "description": "Auto includes specified file relative to bootloader folder",
+      "name": "subtract",
+      "description": "Subtracts the second number from the first",
       "params": [
-        { "name": "fileName", "type": "string", "description": "Name of the file without .lua suffix" }
+        {
+          "name": "x",
+          "type": "",
+          "description": "number The first number"
+        },
+        {
+          "name": "y",
+          "type": "",
+          "description": "number The second number to subtract"
+        }
       ],
-      "returns": []
+      "returns": [
+        {
+          "type": "number",
+          "description": "The result of x - y"
+        }
+      ]
     }
   ]
 }
