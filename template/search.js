@@ -3,6 +3,33 @@ function initSearch() {
     const functions = document.querySelectorAll('.function');
     const navItems = document.querySelectorAll('.nav-item');
     
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const href = this.getAttribute('href');
+            
+            if (href.startsWith('#')) {
+                const targetId = href.substring(1);
+                const targetElement = document.getElementById(targetId);
+                
+                if (targetElement) {
+                    targetElement.scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'start',
+                        inline: 'nearest'
+                    });
+                    
+                    history.pushState(null, null, href);
+
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            } else {
+                window.location.href = href;
+            }
+        });
+    });
+
     document.querySelectorAll('.nav-title').forEach(title => {
         title.addEventListener('click', function() {
             const section = this.parentElement;
@@ -37,7 +64,7 @@ function initSearch() {
             }
         });
     });
-    
+        
     const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -46,13 +73,14 @@ function initSearch() {
                     link.classList.remove('active');
                     if (link.getAttribute('href') === '#' + id) {
                         link.classList.add('active');
-                        const section = link.closest('.nav-section');
-                        section.classList.remove('collapsed');
                     }
                 });
             }
         });
-    }, { threshold: 0.5 });
+    }, { 
+        threshold: 0.5,
+        rootMargin: '-10% 0px -85% 0px'
+    });
     
     functions.forEach(func => observer.observe(func));
 }
