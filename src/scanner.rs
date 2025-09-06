@@ -107,12 +107,22 @@ fn extract_doc_content(line: &str) -> String {
 }
 
 fn categorize_function(func_name: &str, class_name: &Option<String>) -> (String, String) {
+    // if we have a @class annotation, use that as the category
+    if let Some(class) = class_name {
+        let function_name = if func_name.contains('.') {
+            func_name.split('.').last().unwrap_or(func_name)
+        } else {
+            func_name
+        };
+        return (class.clone(), function_name.to_string());
+    }
+    
+    // fallback
     if func_name.contains('.') {
         let parts: Vec<&str> = func_name.splitn(2, '.').collect();
         (parts[0].to_string(), parts[1].to_string())
     } else {
-        let category = class_name.clone().unwrap_or_else(|| "Global".to_string());
-        (category, func_name.to_string())
+        ("Global".to_string(), func_name.to_string())
     }
 }
 
